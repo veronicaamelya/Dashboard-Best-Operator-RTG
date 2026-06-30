@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Nominasi Operator RTG – TPS</title>
+<script src="xlsx.full.min.js"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- LOADING OVERLAY -->
+<div class="overlay" id="ov"><div class="spin"></div><div class="spin-txt" id="ovt">Memproses...</div></div>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-in">
+   <img class="hdr-logo-right" src="assets/logo tps.png" alt="Pelindo TPS">
+    <div class="hdr-center">
+      <h1>DASHBOARD NOMINASI OPERATOR RTG </h1>
+      <p>PT Terminal Petikemas Surabaya </p>
+    </div>
+   <img class="hdr-logo-right" src="assets/logo resilience.png" alt="resilience">
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tabs-in">
+    <button class="tab on" onclick="sw('upload',this)">⬆️ Upload & Proses</button>
+    <button class="tab" onclick="sw('dash',this)">📊 Dashboard</button>
+    <button class="tab" onclick="sw('tbl',this)">📋 Data Lengkap</button>
+    <button class="tab" onclick="sw('det',this)">🔍 Detail Operator</button>
+    <button class="tab" onclick="sw('thn',this)">🏅 Nominasi Tahunan</button>
+  </div>
+</div>
+
+<div class="main">
+  <div id="alertBox" class="alert"></div>
+
+  <!-- ===== UPLOAD ===== -->
+  <div id="pane-upload" class="pane on">
+
+    <div class="fbox">
+      <h3>BOBOT PENILAIAN </h3>
+      <div class="fgrid">
+        <div class="bi"><label>RTG Dinson</label><div class="bi-row"><span class="bval">35</span><span style="font-size:12px;color:var(--muted)">poin</span></div></div>
+        <div class="bi"><label>RTG Kone</label><div class="bi-row"><span class="bval">20</span><span style="font-size:12px;color:var(--muted)">poin</span></div></div>
+        <div class="bi"><label>RTG Kalmar</label><div class="bi-row"><span class="bval">20</span><span style="font-size:12px;color:var(--muted)">poin</span></div></div>
+        <div class="bi"><label>Match Penempatan Alat</label><div class="bi-row"><span class="bval">15</span><span style="font-size:12px;color:var(--muted)">poin</span></div></div>
+        <div class="bi"><label>Match Manning</label><div class="bi-row"><span class="bval">10</span><span style="font-size:12px;color:var(--muted)">poin</span></div></div>
+      </div>
+      <div class="fi-d">Operator <b>GUGUR</b> jika :<br>
+        • Terlambat / Pulang Cepat / Tanpa Keterangan / Tidak Absen Masuk atau Keluar<br>
+        • Terlibat insiden K3</div>
+      <div class="btotal ok">✅ Total: 100 poin</div>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden;margin-bottom:14px;">
+      <div class="upload-zone" id="uz"
+           onclick="document.getElementById('fi').click()"
+           ondragover="event.preventDefault();this.classList.add('drag')"
+           ondragleave="this.classList.remove('drag')"
+           ondrop="event.preventDefault();this.classList.remove('drag');handleDrop(event)">
+        <button class="reset-btn" onclick="event.stopPropagation();resetFile()">✕ Ganti File</button>
+        <input type="file" id="fi" accept=".xlsx,.xls" style="display:none" onchange="loadFile(this.files[0])">
+        <div id="uz-ico" style="font-size:52px;margin-bottom:12px">📂</div>
+        <h3 id="uz-title">Drag & drop file Excel ke sini</h3>
+        <p id="uz-desc">1 file berisi semua sheet: RAW DATA, Manning, Presensi, K3, dll.</p>
+        <button class="ubtn" onclick="event.stopPropagation();document.getElementById('fi').click()">Pilih File</button>
+        <div id="uz-chk"></div>
+        <div id="uz-extra" style="font-size:10px;color:var(--muted);margin-top:8px;"></div>
+      </div>
+    </div>
+
+    <div class="pbar-wrap">
+      <div class="pbar-info">
+        <h3>🔄 Hitung Poin</h3>
+        <p id="pstat">Upload file Excel terlebih dahulu.</p>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <input type="text" id="periode-in" placeholder="Nama periode (mis: MARET 2026)"
+          style="padding:9px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;width:195px">
+        <button class="go-btn" id="go-btn" onclick="processAll()" disabled>▶ Proses</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== DASHBOARD ===== -->
+  <div id="pane-dash" class="pane">
+    <div id="dash-content"><div class="empty"><div class="ei">📊</div><h3>Belum ada data</h3><p>Upload & proses file di tab pertama.</p></div></div>
+  </div>
+
+  <!-- ===== DATA LENGKAP ===== -->
+  <div id="pane-tbl" class="pane">
+    <div id="tbl-content"><div class="empty"><div class="ei">📋</div><h3>Belum ada data</h3></div></div>
+  </div>
+
+  <!-- ===== DETAIL ===== -->
+  <div id="pane-det" class="pane">
+    <div id="det-content"><div class="empty"><div class="ei">🔍</div><h3>Pilih operator untuk detail</h3></div></div>
+  </div>
+
+  <!-- ===== TAHUNAN ===== -->
+  <div id="pane-thn" class="pane">
+    <div id="thn-content"><div class="empty"><div class="ei">🏅</div><h3>Belum ada data</h3><p>Upload beberapa periode untuk tracking tahunan.</p></div></div>
+  </div>
+</div>
+
+<script src="dashboard.js"></script>
+</body>
+</html>
